@@ -4,17 +4,17 @@ require_once('utils/database.php');
 
 class Borrowing
 {
-    public $id, $userId, $staffId, $borrowingDate;
+    public $id, $user, $staff, $borrowingDate;
 
     public function __construct(
         int $id,
-        int $userId,
-        int $staffId,
+        User $user,
+        User $staff,
         DateTime $borrowingDate,
     ) {
         $this->id = $id;
-        $this->userId = $userId;
-        $this->staffId = $staffId;
+        $this->user = $user;
+        $this->staff = $staff;
         $this->borrowingDate = $borrowingDate;
     }
 
@@ -31,14 +31,35 @@ class Borrowing
         $result = Database::query($sql);
         while ($row = $result->fetch_assoc())
         {
+            require_once('models/user.php');
             $data[] = new Borrowing(
                 $row['borrowingId'],
-                $row['userId'],
-                $row['staffId'],
+                User::getById($row['userId']),
+                User::getById($row['staffId']),
                 new DateTime($row['borrowingDate'])
             );
         }
         return $data;
+    }
+
+    /**
+     * Get borrowing by id methods
+     * 
+     * @param int $id
+     * @return Borrowing 
+     */
+    public static function getById(int $id): Borrowing
+    {
+        $sql = "SELECT * FROM borrowings WHERE borrowingId = ?";
+        $params = [$id];
+        $result = Database::query($sql, $params);
+        $row = $result->fetch_assoc();
+        return new Borrowing(
+            $row['borrowingId'],
+            User::getById($row['userId']),
+            User::getById($row['staffId']),
+            new DateTime($row['borrowingDate'])
+        );
     }
 
     /**
@@ -51,7 +72,7 @@ class Borrowing
     public static function add(Borrowing $b): bool
     {
         $sql = "INSERT INTO borrrowing VALUES (?, ?, ?, ?)";
-        $params = [$b->id, $b->userId, $b->staffId, $b->borrowingDate];
+        $params = [$b->id, $b->user->id, $b->staff->id, $b->borrowingDate];
         $result = Database::query($sql, $params);
         return $result > 0;
     }

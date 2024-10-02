@@ -57,4 +57,23 @@ class User
         return $data;
     }
 
+    public static function getById(int $id)
+    {
+        $sql = "SELECT * FROM user WHERE userId = ?";
+        $params = [$id];
+        $result = Database::query($sql, $params);
+        $row = $result->fetch_assoc();
+        return new User(
+            $row['userId'],
+            $row['firstname'], 
+            $row['lastname'], 
+            $row['username'], 
+            $row['password'], 
+            new DateTime($row['registDate']),
+            $row['email'], 
+            $row['phone'],
+            $row['role']
+        );
+    }
+
 }
