@@ -27,6 +27,7 @@ class BorrowDetail
         $result = Database::query($sql);
         while ($row = $result->fetch_assoc())
         {
+            require_once('models/borrowing.php');
             $data[] = new BorrowDetail(
                 $row['borrowDetailId'],
                 Borrowing::getById($row['borrowingId']),
